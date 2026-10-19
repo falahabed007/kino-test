@@ -131,6 +131,8 @@ html, body { overflow-x: clip; }
   text-decoration: none;
   backdrop-filter: blur(6px);
 }
+/* Handy: unten rechts sitzt der Mobil-Warenkorb der Seite, der Knopf weicht nach links aus */
+.kino--handy .kino-skip { left: 1rem; transform: none; }
 .kino--standbild .kino-skip,
 .kino--kurz .kino-skip { display: none; }
 
