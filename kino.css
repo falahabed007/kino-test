@@ -1,0 +1,139 @@
+/* Kino-Kopfbereich der Bestellseite (Skill kino-bestellseite).
+   Jede Regel beginnt mit .kino, mit genau einer Ausnahme direkt hier unten. */
+
+/* Ausnahme: Die Vorlage setzt html, body { overflow-x: hidden }. Das macht body
+   zum Scroll-Container, und position: sticky klebt nicht mehr. clip schneidet
+   genauso ab, ohne Scroll-Container. */
+html, body { overflow-x: clip; }
+
+.kino {
+  /* Farben der Seite. "ort" durch css_praefix aus stammdaten.json ersetzen. */
+  --kino-grund: var(--ort-grund, #14110f);
+  --kino-akzent: var(--ort-akzent, #c62828);
+  --kino-auf-akzent: var(--ort-auf-akzent, #ffffff);
+  --kino-text: #ffffff;
+  --kino-schatten: 0 1px 2px rgba(0,0,0,.55), 0 2px 12px rgba(0,0,0,.45), 0 0 40px rgba(0,0,0,.35);
+
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  height: 70svh;                 /* Standbild, kurz, und ohne JS */
+  background: var(--kino-grund);
+  color: var(--kino-text);
+}
+.kino--video { height: 300vh; }
+.kino--handy { height: 220svh; }
+
+.kino-buehne {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--kino-grund) center / cover no-repeat;
+}
+.kino--standbild .kino-buehne,
+.kino--kurz .kino-buehne {
+  position: relative;
+  height: 100%;
+  background-image: url('assets/kino/hero-ending.jpg');
+}
+.kino--video.kino-poster-an .kino-buehne { background-image: url('assets/kino/hero-poster.jpg'); }
+
+.kino-video,
+.kino-leinwand {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+.kino-video { object-fit: cover; }
+.kino--video .kino-video,
+.kino--handy .kino-leinwand { display: block; }
+.kino-bereit .kino-video,
+.kino-bereit .kino-leinwand { opacity: 1; }
+
+.kino-schleier {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 120% 90% at 50% 45%, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 100%);
+}
+
+/* Baender: Lage am PC seitlich der Mitte, auf dem Handy oben (handy.md) */
+.kino-band {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(88%, 38rem);
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.5rem, 3.6vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-shadow: var(--kino-schatten);
+  opacity: 0;
+  pointer-events: none;
+}
+.kino--handy .kino-band { top: 18%; font-size: clamp(1.4rem, 7vw, 2rem); }
+
+.kino-ende {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .6rem;
+  padding: 0 1rem;
+  text-align: center;
+  opacity: 0;
+}
+.kino--standbild .kino-ende,
+.kino--kurz .kino-ende { opacity: 1; }
+.kino-logo { max-height: 22svh; max-width: 70vw; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,.7)); }
+.kino-adresse { margin: 0; font-size: 1rem; text-shadow: var(--kino-schatten); }
+.kino-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: .7rem 1.6rem;
+  border-radius: 999px;
+  background: var(--kino-akzent);
+  color: var(--kino-auf-akzent);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+
+/* Sprungziel direkt hinter dem Kopfbereich. Die Kategorienleiste der Vorlage ist
+   position: fixed und taugt deshalb nicht als Ziel. --kino-kopf = Hoehe der festen Kopfleiste. */
+.kino-danach { scroll-margin-top: var(--kino-kopf, 70px); }
+
+.kino-skip {
+  position: absolute;
+  left: 50%;
+  bottom: 1.2rem;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .4rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  font-size: .95rem;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+}
+.kino--standbild .kino-skip,
+.kino--kurz .kino-skip { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kino *, .kino *::before, .kino *::after { transition: none !important; animation: none !important; }
+}

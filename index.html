@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kino-Test</title>
+<style>
+  /* Nachbau der Bestellseite: dieselben Fallen wie die Vorlage (overflow-x: hidden, feste Leisten) */
+  html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; font-family: -apple-system, system-ui, Arial, sans-serif; background: #f3efe9; color: #222; }
+  .kopf { position: fixed; top: 0; left: 0; right: 0; height: 68px; z-index: 600; display: flex; align-items: center; justify-content: space-between;
+          padding: 0 16px; background: #1d1a17; color: #fff; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+  .kopf small { font-weight: 400; opacity: .7; }
+  .info { padding: 24px 16px; background: #fff; text-align: center; }
+  .kategorie { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .kategorie h2 { margin: 24px 0 8px; }
+  .gericht { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #ddd; }
+  .korb { position: fixed; right: 16px; bottom: 16px; z-index: 100001; padding: 14px 20px; border-radius: 26px; background: #c62828; color: #fff; font-weight: 700; border: 0; }
+  #messwerte { position: fixed; left: 8px; bottom: 8px; z-index: 100002; padding: 6px 10px; border-radius: 8px; background: rgba(0,0,0,.75); color: #0f0;
+               font: 12px/1.4 ui-monospace, Menlo, monospace; white-space: pre; pointer-events: none; }
+</style>
+<link rel="stylesheet" href="kino.css">
+</head>
+<body>
+<header class="kopf">Kino-Test <small>Bestellseite (Nachbau)</small></header>
+
+<!-- KINO:START -->
+<section class="kino" id="kino" aria-label="Kino-Test" data-bilder="72">
+  <div class="kino-buehne">
+    <video class="kino-video" muted playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+    <canvas class="kino-leinwand" aria-hidden="true"></canvas>
+    <div class="kino-schleier" aria-hidden="true"></div>
+    <p class="kino-band" data-von="0.04" data-bis="0.26">Erstes Band</p>
+    <p class="kino-band" data-von="0.34" data-bis="0.56">Zweites Band</p>
+    <p class="kino-band" data-von="0.62" data-bis="0.76">Drittes Band</p>
+    <div class="kino-ende">
+      <p class="kino-adresse">Teststraße 1, 12345 Testort</p>
+      <a class="kino-cta" href="#kino-danach">Jetzt bestellen</a>
+    </div>
+    <a class="kino-skip" href="#kino-danach">Zur Speisekarte ↓</a>
+  </div>
+</section>
+<div id="kino-danach" class="kino-danach"></div>
+<!-- KINO:END -->
+
+<div class="info">Liefergebiet, Telefon, WhatsApp (Platzhalter)</div>
+<main id="karte"></main>
+<button class="korb" type="button">Warenkorb (0)</button>
+<div id="messwerte">…</div>
+
+<script>
+  // Platzhalter-Karte, damit unter dem Kino eine lange Seite steht
+  const karte = document.getElementById('karte');
+  for (const k of ['Pizza', 'Pasta', 'Salate', 'Getränke']) {
+    let html = `<section class="kategorie"><h2>${k}</h2>`;
+    for (let i = 1; i <= 8; i++) html += `<div class="gericht"><span>${k} Nr. ${i}</span><span>${(7 + i * 0.5).toFixed(2).replace('.', ',')} €</span></div>`;
+    karte.insertAdjacentHTML('beforeend', html + '</section>');
+  }
+
+  // Messwerte fuer den iPhone-Test: Modus, Bild, Ladungen dieses Tabs.
+  // Steigt "Ladungen", ohne dass neu geladen wurde, hat Safari den Tab wegen Speicher neu gestartet.
+  let ladungen = 1;
+  try { ladungen = Number(sessionStorage.getItem('kino-ladungen') || 0) + 1; sessionStorage.setItem('kino-ladungen', ladungen); } catch (e) {}
+  const kino = document.getElementById('kino');
+  const messwerte = document.getElementById('messwerte');
+  let bilderZeit = 0;
+  const t0 = performance.now();
+  function zeige() {
+    const c = kino.querySelector('.kino-leinwand'), v = kino.querySelector('.kino-video');
+    const geladen = performance.getEntriesByType('resource').filter(r => r.name.includes('/kino/m/')).length;
+    if (!bilderZeit && geladen >= 72) bilderZeit = Math.round(performance.now() - t0);
+    messwerte.textContent =
+      `Modus:    ${kino.dataset.modus || '-'}\n` +
+      (kino.dataset.modus === 'video' ? `Zeit:     ${v.currentTime.toFixed(2)} s\n` : `Bild:     ${c.dataset.bild ?? '-'} von 71\n`) +
+      `Bilder:   ${geladen}/72${bilderZeit ? '  (' + (bilderZeit / 1000).toFixed(1) + ' s)' : ''}\n` +
+      `Ladungen: ${ladungen}`;
+  }
+  setInterval(zeige, 150);   // bewusst kein eigener rAF-Takt: der soll die Messung nicht verfaelschen
+</script>
+<script src="kino.js" defer></script>
+</body>
+</html>
